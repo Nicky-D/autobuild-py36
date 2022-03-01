@@ -67,6 +67,10 @@ PLATFORM_COMMON    = 'common'
 
 DEFAULT_ADDRSIZE = 32
 
+if sys.platform.startswith( "linux" ):
+  DEFAULT_ADDRSIZE = 64
+  logger.info( "Setting default address size to 64 bit for Linux builds" )
+  
 # Similarly, if we have an explicit platform in the environment, keep it. We
 # used to query os.environ in establish_platform(), instead of up here. The
 # trouble was that establish_platform() *sets* these os.environ entries -- so
