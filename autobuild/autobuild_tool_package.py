@@ -279,11 +279,19 @@ def _generate_archive_name(package_description, build_id, platform_name, suffix=
     # We ensure that the package name and platform definition
     # do not have hyphens in them as this will confuse the
     # related split_tarname() method.
+
+    distro = ""
+    try:
+        from lsb_release import get_distro_information
+        distro = get_distro_information()["CODENAME"]
+        distro = "_" + distro
+    except:
+        pass
     package_name = package_description.name.replace('-', '_')
     platform_name = platform_name.replace('/', '_').replace('-', '_')
     name = package_name \
            + '-' + package_description.version \
-           + '-' + platform_name \
+           + '-' + platform_name + distro \
            + '-' + build_id \
            + suffix
     return name
