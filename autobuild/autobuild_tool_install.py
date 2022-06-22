@@ -240,7 +240,28 @@ def get_package_file(package_name, package_url, hash_algorithm='md5', expected_h
             # Attempt to download the remote file
             logger.info("downloading %s:\n  %s\n     to %s" % (package_name, package_url, cache_file))
             try:
-                package_response = urllib.request.urlopen(package_url, None, download_timeout_seconds)
+                if package_url.startswith("jf://" ):
+                    url = package_url[5:]
+                    cmd = ["jf", "rt",  "dl", "--quiet", "--flat", url, cache_file ]
+                    subprocess.check_call( cmd )
+                    package_response = None
+                elif package_url.startswith("jfgpg://" ):
+                    url = package_url[8:]
+                    cmd = ["jf", "rt",  "dl", "--quiet", "--flat", url+".gpg", cache_file+".gpg" ]
+                    subprocess.check_call( cmd )
+                    cmd = ["gpg", "-q", "-d", "-o", cache_file, "--batch", "--yes", cache_file+".gpg" ]
+                    subprocess.check_call( cmd )
+                    package_response = None
+                elif package_url.startswith("jfage://" ):
+                    url = package_url[8:]
+                    cmd = ["jf", "rt",  "dl", "--quiet", "--flat", url+".age", cache_file+".age" ]
+                    print( " ".join(cmd) )
+                    subprocess.check_call( cmd )
+                    cmd = ["age", "-d", "-i", os.environ["AGE_PRIVATE_KEY"], "-o", cache_file, cache_file+".age" ]
+                    subprocess.check_call( cmd )
+                    package_response = None
+                else:
+                    package_response = urllib.request.urlopen(package_url, None, download_timeout_seconds)
             except urllib.error.URLError as err:
                 logger.error("error: %s\n  downloading package %s" % (err, package_url))
                 if "AUTOBUILD_PKG_URL" in os.environ and package_url.startswith("file:///"):
