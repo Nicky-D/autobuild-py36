@@ -194,7 +194,15 @@ def establish_platform(specified_platform=None, addrsize=DEFAULT_ADDRSIZE):
     os.environ['AUTOBUILD_ADDRSIZE'] = str(addrsize) # for spawned commands
     os.environ['AUTOBUILD_PLATFORM'] = Platform # for spawned commands
     os.environ['AUTOBUILD_PLATFORM_OVERRIDE'] = Platform # for recursive invocations
+    os.environ['AUTOBUILD_CPU_COUNT'] = os.environ.get('AUTOBUILD_CPU_COUNT', str(multiprocessing.cpu_count()))
 
+    os.environ['AUTOBUILD_ARCH'] = platform.machine().lower()
+    # Linux, eiter -m64 or nothing when not on a x86 based platform.
+    if platform.machine().lower() == "x86_64":
+        os.environ['AUTOBUILD_GCC_ARCH'] = "-m64"
+    else:
+        os.environ['AUTOBUILD_GCC_ARCH'] = ""
+    
     logger.debug("Specified platform %s address-size %d: result %s" \
                  % (specified_platform, specified_addrsize, Platform))
     
